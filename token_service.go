@@ -1,0 +1,49 @@
+package auth_service
+
+import (
+	"github.com/dgrijalva/jwt-go"
+	"github.com/pkg/errors"
+	"time"
+)
+
+type TokenService interface {
+	Issue() (string, error)
+}
+
+type TokenServiceImpl struct {
+	tokenTTL  int64
+	secretKey []byte
+
+	tokens map[string]*jwt.Token
+}
+
+func NewTokenService(tokenTTL int64, secretKey []byte) TokenService {
+	return TokenServiceImpl{
+		tokenTTL:  tokenTTL,
+		secretKey: secretKey,
+		tokens:    make(map[string]*jwt.Token),
+	}
+}
+
+func (tokenService TokenServiceImpl) Issue() (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"accesses":   []string{"edit", "view"},
+		"issued_at":  time.Now().Unix(),
+		"expires_at": time.Now().Unix() + tokenService.tokenTTL,
+	})
+
+	tokenString, err := token.SignedString([]byte(tokenService.secretKey))
+
+	if err != nil {
+		return "", err
+	}
+
+	// Save token
+	tokenService.tokens[tokenString] = token
+
+	return tokenString, nil
+}
+
+func (tokenService TokenServiceImpl) Revoke() error {
+	return errors.New("Not Implemented")
+}
