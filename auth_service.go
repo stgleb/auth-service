@@ -41,7 +41,7 @@ func (authService AuthService) AuthHandler(w http.ResponseWriter, r *http.Reques
 		} else {
 			log.Printf("Authenticate user with login %s", credentials.Login)
 			if authService.Authenticate(credentials.Login, credentials.Password) {
-				if token, err := authService.GenerateToken(); err == nil {
+				if token, err := authService.Issue(); err == nil {
 					log.Printf("Issue token for %s user %s", token[len(token)-8:], credentials.Login)
 					w.Header().Add("Authorization", fmt.Sprintf("Bearer %s", token))
 					return
