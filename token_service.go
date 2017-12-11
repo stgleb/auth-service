@@ -2,7 +2,6 @@ package auth_service
 
 import (
 	"github.com/dgrijalva/jwt-go"
-	"github.com/pkg/errors"
 	"time"
 )
 
@@ -44,6 +43,3 @@ func (tokenService TokenServiceImpl) Issue() (string, error) {
 	return tokenString, nil
 }
 
-func (tokenService TokenServiceImpl) Revoke() error {
-	return errors.New("Not Implemented")
-}

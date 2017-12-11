@@ -35,10 +35,10 @@ func main() {
 	ReadConfig()
 
 	router := mux.NewRouter()
-	authService := NewAuthService(config.TokenTTL, []byte(config.SecretKey))
+	InitAuthService(config.TokenTTL, []byte(config.SecretKey))
 
-	router.HandleFunc("/login", authService.AuthHandler).Methods(http.MethodPost)
-	router.HandleFunc("/validate", authService.Validate)
+	router.HandleFunc("/login", AuthHandler).Methods(http.MethodPost)
+	router.HandleFunc("/validate", Validate)
 
 	log.Printf("Listen and serve on %s\n", config.ListenStr)
 
