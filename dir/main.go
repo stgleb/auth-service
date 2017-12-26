@@ -4,9 +4,10 @@ import (
 	"crypto/rsa"
 
 	"fmt"
-	"github.com/dgrijalva/jwt-go"
 	"io/ioutil"
 	"time"
+
+	"github.com/dgrijalva/jwt-go"
 )
 
 var (
@@ -58,12 +59,28 @@ func main() {
 			"user_info":  userInfo,
 		})
 
-	token, err := t.SignedString(privateKey)
+	tokenStr, err := t.SignedString(privateKey)
 
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Println(token)
+	fmt.Println(tokenStr)
 
+	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+		return publicKey, nil
+	})
+
+	switch err.(type) {
+	case nil:
+		if !token.Valid {
+			panic("Token is not valid")
+		}
+
+		fmt.Println("Access has been granted")
+	case *jwt.ValidationError:
+		panic(err)
+	default:
+		panic(fmt.Sprintf("Unknown errir %s", err.Error()))
+	}
 }
