@@ -2,13 +2,14 @@ package auth_service
 
 import (
 	"encoding/json"
-	"net/http"
 	"fmt"
 	"io/ioutil"
-	"strings"
-	"github.com/dgrijalva/jwt-go"
-	"time"
 	"log"
+	"net/http"
+	"strings"
+	"time"
+
+	"github.com/dgrijalva/jwt-go"
 )
 
 func AuthHandler(w http.ResponseWriter, r *http.Request) {
@@ -74,4 +75,3 @@ func Validate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
-

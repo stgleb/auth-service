@@ -42,4 +42,3 @@ func (tokenService TokenServiceImpl) Issue() (string, error) {
 
 	return tokenString, nil
 }
-
