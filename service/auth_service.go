@@ -16,6 +16,6 @@ func InitAuthService(tokenTTL int64, privateKeyFilePath, publicKeyFilePath strin
 	}
 }
 
-func (authService AuthService) Authenticate(login, password string) bool {
+func (authService AuthService) Authenticate(login, password string) (bool, error) {
 	return true
 }
