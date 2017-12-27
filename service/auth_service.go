@@ -2,18 +2,16 @@ package service
 
 type AuthService struct {
 	TokenService
-	SecretKey []byte
-	storage   map[string]string
+	storage map[string]string
 }
 
 var (
 	AuthenticationService AuthService
 )
 
-func InitAuthService(tokenTTL int64, secretKey []byte) {
+func InitAuthService(tokenTTL int64, privateKeyFilePath, publicKeyFilePath string) {
 	AuthenticationService = AuthService{
-		NewTokenService(tokenTTL, secretKey),
-		secretKey,
+		NewTokenService(tokenTTL, privateKeyFilePath, publicKeyFilePath),
 		make(map[string]string),
 	}
 }

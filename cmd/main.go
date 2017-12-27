@@ -2,17 +2,20 @@ package main
 
 import (
 	. "auth-service"
+	"auth-service/service"
 	"flag"
-	"github.com/BurntSushi/toml"
-	"github.com/gorilla/mux"
 	"log"
 	"net/http"
+
+	"github.com/BurntSushi/toml"
+	"github.com/gorilla/mux"
 )
 
 type Config struct {
-	ListenStr string
-	SecretKey string
-	TokenTTL  int64
+	ListenStr          string
+	PublicKeyFilePath  string
+	PrivateKeyFilePath string
+	TokenTTL           int64
 }
 
 var (
@@ -35,10 +38,7 @@ func main() {
 	ReadConfig()
 
 	router := mux.NewRouter()
-	InitAuthService(config.TokenTTL, []byte(config.SecretKey))
-
-	router.HandleFunc("/login", AuthHandler).Methods(http.MethodPost)
-	router.HandleFunc("/validate", Validate)
+	service.InitAuthService(config.TokenTTL, config.PrivateKeyFilePath, config.PublicKeyFilePath)
 
 	log.Printf("Listen and serve on %s\n", config.ListenStr)
 

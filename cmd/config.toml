@@ -1,4 +1,4 @@
 ListenStr  = "0.0.0.0:8080"
 TokenTTL = 86400
-PrivateKey = "abcd"
-PublicKey = "efgh"
+PublicKeyFilePath = ""
+PrivateKeyFilePath = "
