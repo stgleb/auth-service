@@ -1,11 +1,11 @@
 package data
 
 type TokenResponse struct {
-	Token string `json:"token"`
+	Token string `json:"token,omitempty"`
 	Error string `json:"error,omitempty"`
 }
 
-type IssueTokenResponse struct {
+type LoginResponse struct {
 	TokenResponse
 }
 

@@ -4,13 +4,16 @@ import (
 	"time"
 
 	"crypto/rsa"
-	"io/ioutil"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/pkg/errors"
 )
 
 type TokenService interface {
 	Issue() (string, error)
+	Authenticate(string, string) (bool, error)
+	Login(string, string) (string, error)
+	VerifyToken(string) error
 }
 
 type TokenServiceImpl struct {
@@ -22,33 +25,7 @@ type TokenServiceImpl struct {
 	tokens map[string]*jwt.Token
 }
 
-func NewTokenService(tokenTTL int64, privateKeyFilePath, publicKeyFilePath string) TokenService {
-	var (
-		publicKey  *rsa.PublicKey
-		privateKey *rsa.PrivateKey
-	)
-
-	privateKeyData, err := ioutil.ReadFile(privateKeyFilePath)
-	if err != nil {
-		panic(err)
-	}
-
-	privateKey, err = jwt.ParseRSAPrivateKeyFromPEM(privateKeyData)
-	if err != nil {
-		panic(err)
-	}
-
-	publicKeyData, err := ioutil.ReadFile(publicKeyFilePath)
-
-	if err != nil {
-		panic(err)
-	}
-
-	publicKey, err = jwt.ParseRSAPublicKeyFromPEM(publicKeyData)
-	if err != nil {
-		panic(err)
-	}
-
+func NewTokenService(tokenTTL int64, publicKey *rsa.PublicKey, privateKey *rsa.PrivateKey) TokenService {
 	return TokenServiceImpl{
 		tokenTTL:   tokenTTL,
 		privateKey: privateKey,
@@ -77,18 +54,36 @@ func (tokenService TokenServiceImpl) Issue() (string, error) {
 	return tokenStr, nil
 }
 
-func (tokenService TokenServiceImpl) VerifyToken(tokenString string) (bool, error) {
+func (tokenService TokenServiceImpl) VerifyToken(tokenString string) error {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		return tokenService.publicKey, nil
 	})
 
 	if err != nil {
-		return false, err
+		return err
 	}
 
 	if !token.Valid {
-		return false, nil
+		return errors.New("Token is not valid")
 	}
 
+	return nil
+}
+
+func (tokenService TokenServiceImpl) Authenticate(login, password string) (bool, error) {
 	return true, nil
+}
+
+func (tokenService TokenServiceImpl) Login(login, password string) (string, error) {
+	if isAuthenticated, err := tokenService.Authenticate(login, password); err != nil || isAuthenticated {
+		return "", err
+	}
+
+	token, err := tokenService.Issue()
+
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
 }

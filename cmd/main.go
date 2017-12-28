@@ -1,13 +1,15 @@
 package main
 
 import (
-	. "auth-service"
-	"auth-service/service"
+	. "auth-service/endpoint"
+	. "auth-service/service"
+	. "auth-service/transport"
 	"flag"
 	"log"
 	"net/http"
 
 	"github.com/BurntSushi/toml"
+	httptransport "github.com/go-kit/kit/transport/http"
 	"github.com/gorilla/mux"
 )
 
@@ -38,7 +40,25 @@ func main() {
 	ReadConfig()
 
 	router := mux.NewRouter()
-	service.InitAuthService(config.TokenTTL, config.PrivateKeyFilePath, config.PublicKeyFilePath)
+	// TODO(stgleb): Get keys from vault
+	publicKey, privateKey := ReadKeys(config.PrivateKeyFilePath, config.PublicKeyFilePath)
+
+	service := NewTokenService(config.TokenTTL, publicKey, privateKey)
+
+	loginHandler := httptransport.NewServer(
+		MakeLoginEndpoint(service),
+		DecodeLoginRequest,
+		EncodeLogin,
+	)
+
+	verifyTokenHandler := httptransport.NewServer(
+		MakeVerifyTokenEndpoint(service),
+		DecodeVerifyTokenRequest,
+		EncodeVerifyTokenResponse,
+	)
+
+	router.Handle("/login", loginHandler)
+	router.Handle("/verify", verifyTokenHandler)
 
 	log.Printf("Listen and serve on %s\n", config.ListenStr)
 
